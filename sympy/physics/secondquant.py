@@ -990,34 +990,35 @@ class BosonState(FockState):
             new_occs[i] = new_occs[i] - S.One
             return self.__class__(new_occs)
 
-
+# class for a Fermion state
 class FermionState(FockState):
     """
     Base class for FockStateFermion(Ket/Bra).
     """
 
-    fermi_level = 0
+    fermi_level = 0 # define fermi_level as 0
 
     def __new__(cls, occupations, fermi_level=0):
-        occupations = list(map(sympify, occupations))
-        if len(occupations) > 1:
+        occupations = list(map(sympify, occupations)) # make occupation usable
+        if len(occupations) > 1: # if >1 occuption, check the signs
             try:
                 (occupations, sign) = _sort_anticommuting_fermions(
                     occupations, key=hash)
             except ViolationOfPauliPrinciple:
                 return S.Zero
         else:
-            sign = 0
+            sign = 0 # sign does not have to be changed
 
-        cls.fermi_level = fermi_level
+        cls.fermi_level = fermi_level # set fermi level for the class
 
         if cls._count_holes(occupations) > fermi_level:
+            print('THIS SHOULD NOT HAPPEN 1337')
             return S.Zero
 
-        if sign % 2:
-            return S.NegativeOne*FockState.__new__(cls, occupations)
-        else:
-            return FockState.__new__(cls, occupations)
+        if sign % 2: # if the sign is odd
+            return S.NegativeOne*FockState.__new__(cls, occupations) # flip
+        else: # if the sign is even
+            return FockState.__new__(cls, occupations) # dont flip
 
     def up(self, i):
         """
@@ -1179,7 +1180,7 @@ class FermionState(FockState):
     def _labels(self):
         return self._negate_holes(self.args[0])
 
-
+# contains nice printing representation
 class FockStateKet(FockState):
     """
     Representation of a ket.
@@ -1233,7 +1234,7 @@ class FockStateBosonBra(BosonState, FockStateBra):
     def _dagger_(self):
         return FockStateBosonKet(*self.args)
 
-
+# class for a Fermion ket. Contains how the Dagger should act.
 class FockStateFermionKet(FermionState, FockStateKet):
     """
     Many-particle Fock state with a sequence of occupied orbits.
